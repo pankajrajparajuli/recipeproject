@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recipe List & Upload</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+<a href="{% url 'logout' %}" class="btn btn-outline-danger">Logout</a>
+  <div class="container mt-5">
+
+    <!-- Recipe Upload Form -->
+    <div class="card shadow rounded mb-4">
+      <div class="card-header bg-primary text-white">
+        <h4>Add a New Recipe</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="recipe_name" class="form-label">Recipe Name</label>
+            <input type="text" class="form-control" id="recipe_name" name="recipe_name" placeholder="e.g. Tomato Soup" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="recipe_description" class="form-label">Description</label>
+            <textarea class="form-control" id="recipe_description" name="recipe_description" rows="4" placeholder="Write the recipe steps here..." required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="recipe_image" class="form-label">Upload Image</label>
+            <input class="form-control" type="file" id="recipe_image" name="recipe_image" accept="image/*" required>
+          </div>
+
+          <button type="submit" class="btn btn-success">Submit Recipe</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Recipe Search Form -->
+    <form method="GET" class="mb-3">
+      <div class="input-group">
+        <input type="text" name="search" class="form-control" placeholder="Search recipes by name..." value="{{ request.GET.search }}">
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+      </div>
+    </form>
+
+    <!-- Recipe List Table -->
+    <div class="card shadow rounded mt-4">
+      <div class="card-header bg-secondary text-white">
+        <h4>All Recipes</h4>
+      </div>
+      <div class="card-body">
+        <p>Total recipes: {{ recipes.count }}</p>
+        <table class="table table-bordered table-hover">
+          <thead class="table-light">
+            <tr>
+              <th>#</th>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for recipe in recipes %}
+              <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>
+                  {% if recipe.recipe_image %}
+                    <img src="{{ recipe.recipe_image.url }}" alt="Recipe Image" style="height: 80px; object-fit: cover;" />
+                  {% else %}
+                    <span class="text-muted">No image</span>
+                  {% endif %}
+                </td>
+                <td>{{ recipe.recipe_name }}</td>
+                <td>{{ recipe.recipe_description }}</td>
+                <td class="d-flex gap-2">
+                  <form method="POST" action="{% url 'delete_recipe' recipe.id %}" onsubmit="return confirm('Are you sure you want to delete this recipe?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                  </form>
+                  <a href="{% url 'update_recipe' recipe.id %}" class="btn btn-sm btn-warning">Update</a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="5" class="text-center">No recipes found.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
